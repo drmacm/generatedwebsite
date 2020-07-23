@@ -1,0 +1,435 @@
+@using PDFiller.Website.Models
+@using PDFiller.Website.Services
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div id="prp1form" class="col">
+    <h3>Forma za popunjavanje PRP obrasca</h3>
+    <EditForm Model="@_prpModel" OnValidSubmit="ExportToPdf">
+
+        <fieldset>
+            <legend>Inicijalna pitanja</legend>
+            <div class="form-group row">
+                <label for="glasanje-prosli-izbori-da" class="col-sm-4 form-check-label">Jeste li glasali na izborima 2018. putem pošte ili u DKP-u?</label>
+                <div class="col-sm-8">
+                    <label>
+                        <input type="radio" name="glasanje-prosli-izbori" id="glasanje-prosli-izbori-da" value="Da" @onchange="GlasanjeNaProslimIzborima" />
+                        Da
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" name="glasanje-prosli-izbori" id="glasanje-prosli-izbori-ne" value="Ne" @onchange="GlasanjeNaProslimIzborima" />
+                        Ne
+                    </label>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="izbjeglo-lice-da" class="col-sm-4 form-check-label">Jeste li registrovani kao izbjeglo lice od strane zemlje domaćina?</label>
+                <div class="col-sm-8">
+                    <label>
+                        <input type="radio" name="izbjeglo-lice" id="izbjeglo-lice-da" value="Da" @onchange="StatusIzbjeglogLica" />
+                        Da
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" name="izbjeglo-lice" id="izbjeglo-lice-ne" value="Ne" @onchange="StatusIzbjeglogLica" />
+                        Ne
+                    </label>
+                </div>
+            </div>
+            <div class="alert alert-primary">
+                <p>
+                    Status izbjeglog lica imaju samo osobe koje imaju izbjeglički dokument koji potvrduje status izbjeglice na današnji datum.
+                    <br />
+                    <br />
+                    Status izbjeglog lica <b>nemaju</b>:
+                    <ul>
+                        <li>Osobe koje posjeduju barem jedan CIPS dokument</li>
+                        <li>Osobe koje imaju državljanstvo zemlje domaćina u kojoj borave</li>
+                        <li>Osobe koje se ne vode pod statusom izbjeglice u državi boravka na današnji datum</li>
+                    </ul>
+                </p>
+            </div>
+        </fieldset>
+        <br />
+        <fieldset>
+            <legend>Lični podaci</legend>
+
+            <div class="form-group row">
+                <label for="jmb" class="col-sm-4 col-form-label">JMB</label>
+                <div class="col-sm-8">
+                    <InputText id="jmb" class="form-control" @bind-Value="_prpModel.Jmb" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="prezime" class="col-sm-4 col-form-label">Prezime</label>
+                <div class="col-sm-8">
+                    <InputText id="prezime" class="form-control" @bind-Value="_prpModel.Prezime" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="ime" class="col-sm-4 col-form-label">Ime</label>
+                <div class="col-sm-8">
+                    <InputText id="ime" class="form-control" @bind-Value="_prpModel.Ime" />
+                </div>
+            </div>
+            @if (!_prpModel.GradjaninJeGlasaoNaProslimIzborima)
+            {
+                //to clean the test values which are set if this part of the form is hidden.
+                if (_prpModel.PromjenaOdabiraZaGlasanjeNaProslimIzborima)
+                {
+                    _prpModel.ImeJednogRoditelja = null;
+                    _prpModel.SpolOdabir = null;
+                    _prpModel.PromjenaOdabiraZaGlasanjeNaProslimIzborima = false;
+                }
+            <div class="form-group row">
+                <label for="spol-muski" class="col-sm-4 form-check-label">Spol</label>
+                <div class="col-sm-8">
+                    <label>
+                        <input type="radio" name="spol" id="spol-muski" value="Muski" @onchange="OdabirSpola" />
+                        Muški
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" name="spol" id="spol-zenski" value="Zenski" @onchange="OdabirSpola" />
+                        Ženski
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="ime-jednog-roditelja" class="col-sm-4 col-form-label">Ime jednog roditelja</label>
+                <div class="col-sm-8">
+                    <InputText id="ime-jednog-roditelja" class="form-control" @bind-Value="_prpModel.ImeJednogRoditelja" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="prethodna-imena-i-prezimena" class="col-sm-4 col-form-label">Prethodna imena i prezimena</label>
+                <div class="col-sm-8">
+                    <InputText id="prethodna-imena-i-prezimena" class="form-control" @bind-Value="_prpModel.PrethodnaImenaIPrezimena" />
+                </div>
+            </div>
+            }
+            else
+            {
+                //to pass the validation in case when part of the form is hidden. These values won't be used.
+                _prpModel.ImeJednogRoditelja = "test";
+                _prpModel.SpolOdabir = "test";
+                _prpModel.PromjenaOdabiraZaGlasanjeNaProslimIzborima = true;
+            }
+            <div class="form-group row">
+                <label for="Datum-rodjenja" class="col-sm-4 col-form-label">Datum rođenja</label>
+                <div class="col-sm-8">
+                    <InputDate id="Datum-rodjenja" class="form-control" @bind-Value="_prpModel.DatumRodjenja" min="1900-01-01" max="2003-09-01" />
+                </div>
+            </div>
+        </fieldset>
+        <br />
+        <fieldset>
+            <legend>Prebivalište u Bosni i Hercegovini</legend>
+            <div class="form-group row col">
+                <small class="form-text text-muted">
+                    Lica sa statusom izbjeglog lica iz BiH popunjavaju prebivalište prema posljednjem popisu stanovništva.
+                </small>
+            </div>
+
+            <div class="form-group row">
+                <label for="opcina" class="col-sm-4 col-form-label">Općina</label>
+                <div class="col-sm-8">
+                    <InputText id="opcina" class="form-control" @bind-Value="_prpModel.Opcina" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="mjesto" class="col-sm-4 col-form-label">Naseljeno mjesto</label>
+                <div class="col-sm-8">
+                    <InputText id="mjesto" class="form-control" @bind-Value="_prpModel.NaseljenoMjesto" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="ulica-i-broj" class="col-sm-4 col-form-label">Ulica i kućni broj</label>
+                <div class="col-sm-8">
+                    <InputText id="ulica-i-broj" class="form-control" @bind-Value="_prpModel.UlicaIKucniBroj" />
+                </div>
+            </div>
+        </fieldset>
+        <br />
+        <fieldset>
+            <legend>Prebivalište u Brčko distriktu</legend>
+
+            <div class="form-group row">
+                <label for="brcko-checkbox" class="col-sm-4 col-form-label">Prebivalište u Brčko distriktu?</label>
+                <div class="col-sm-8">
+                    <input type="checkbox" id="brcko-checkbox" data-toggle="collapse" data-target="#brcko-formgroup" @bind="_prpModel.PrebivalisteUBrckoDistriktu" />
+                </div>
+            </div>
+            <div id="brcko-formgroup" class="form-group row collapse">
+                <label for="entitetsko-drzavljanstvo-brcko-fbih" class="col-sm-4 form-check-label">Entitetsko državljanstvo</label>
+                <div class="col-sm-8">
+                    <label>
+                        <input type="radio" name="entitetsko-drzavljanstvo" id="entitetsko-drzavljanstvo-brcko-fbih" value="FBiH" @onchange="OdabirEntitetskogDrzavljanstva" />
+                        FBiH
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" name="entitetsko-drzavljanstvo" id="entitetsko-drzavljanstvo-brcko-rs" value="RS" @onchange="OdabirEntitetskogDrzavljanstva" />
+                        RS
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+        <br />
+        <fieldset>
+            <legend>Način glasanja</legend>
+            <div class="form-group row">
+                <label for="nacin-glasanja-dkp" class="col-sm-4 form-check-label">Način glasanja</label>
+                <div class="col-sm-8">
+                    <label>
+                        <input type="radio" name="nacin-glasanja" id="nacin-glasanja-posta" value="Posta" @onchange="OdabirNacinaGlasanja" data-toggle="collapse" data-target="#dkp-formgroup.show" />
+                        Glasanje putem pošte
+                    </label>
+                    <br />
+                    <label>
+                        <input type="radio" name="nacin-glasanja" id="nacin-glasanja-dkp" value="DKP" @onchange="OdabirNacinaGlasanja" data-toggle="collapse" data-target="#dkp-formgroup:not(.show)" />
+                        Glasanje u diplomatsko-konzularnom predstavništvu BiH
+                    </label>
+
+                </div>
+            </div>
+
+            <div id="dkp-formgroup" class="form-group row collapse">
+                <label for="drzava-grad-dkp" class="col-sm-4 col-form-label">Odaberite državu-grad u kojem se nalazi DKP BiH</label>
+                <div class="col-sm-8">
+                    <InputSelect @bind-Value="_prpModel.DrzavaGradDKP">
+                        <option>Austrija - Bec</option>
+                        <option>Austrija - Grac</option>
+                        <option>Australija - Kambera</option>
+                        <option>Belgija - Brisel</option>
+                        <option>Crna Gora - Podgorica</option>
+                        <option>Ceska Republika - Prag</option>
+                        <option>Danska - Kopenhagen</option>
+                        <option>Francuska - Pariz</option>
+                        <option>Holandija - Hag</option>
+                        <option>Hrvatska - Zagreb</option>
+                        <option>Italija - Rim</option>
+                        <option>Italija - Milano</option>
+                        <option>Kanada - Otava</option>
+                        <option>Madjarska - Budimpesta</option>
+                        <option>Norveska - Oslo</option>
+                        <option>Njemacka - Berlin</option>
+                        <option>Njemacka - Minhen</option>
+                        <option>Njemacka - Stutgart</option>
+                        <option>Njemacka - Frankfurt</option>
+                        <option>SAD - Vasington</option>
+                        <option>SAD - Cikago</option>
+                        <option>Slovenija - Ljubljana</option>
+                        <option>Srbija - Beograd</option>
+                        <option>Spanija - Madrid</option>
+                        <option>Svicarska - Bern</option>
+                        <option>Svedska - Stokholm</option>
+                        <option>Turska - Istanbul</option>
+                        <option>Velika Britanija - London</option>
+                    </InputSelect>
+                </div>
+            </div>
+        </fieldset>
+        <br />
+        <fieldset>
+            <legend>Adresa boravka izvan Bosne i Hercegovine</legend>
+            <div class="form-group row">
+                <label for="ulica-i-broj-van-bih" class="col-sm-4 col-form-label">Ulica i kućni broj</label>
+                <div class="col-sm-8">
+                    <InputText id="ulica-i-broj-van-bih" class="form-control" @bind-Value="_prpModel.UlicaIKucniBrojVanBiH" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="grad-van-bih" class="col-sm-4 col-form-label">Grad</label>
+                <div class="col-sm-8">
+                    <InputText id="grad-van-bih" class="form-control" @bind-Value="_prpModel.GradMjestoVanBiH" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="postanski-broj-van-bih" class="col-sm-4 col-form-label">Poštanski broj</label>
+                <div class="col-sm-8">
+                    <InputText id="postanski-broj-van-bih" class="form-control" @bind-Value="_prpModel.PostanskiBrojVanBiH" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="drzava-van-bih" class="col-sm-4 col-form-label">Država</label>
+                <div class="col-sm-8">
+                    <InputText id="drzava-van-bih" class="form-control" @bind-Value="_prpModel.DrzavaVanBiH" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="email-adresa" class="col-sm-4 col-form-label">E-mail adresa</label>
+                <div class="col-sm-8">
+                    <InputText id="email-adresa" class="form-control" @bind-Value="_prpModel.EmailAdresa" type="email" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="telefon" class="col-sm-4 col-form-label">Kontakt telefon</label>
+                <div class="col-sm-8">
+                    <InputText id="telefon" class="form-control" @bind-Value="_prpModel.Telefon" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="mjesto-podnosenja-prijave" class="col-sm-4 col-form-label">Mjesto podnošenja prijave</label>
+                <div class="col-sm-8">
+                    <InputText id="mjesto-podnosenja-prijave" class="form-control" @bind-Value="_prpModel.MjestoPodnosenjaPrijave" />
+                </div>
+            </div>
+        </fieldset>
+        <br />
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group row">
+            <label for="pristanak-checkbox" class="col-sm-4 col-form-label">Želim biti informiran o Lokalnim izborima 2020. putem e-maila</label>
+            <div class="col-sm-8">
+                <input type="checkbox" id="pristanak-checkbox" @bind="_prpModel.PristanakZaKontakt" />
+            </div>
+        </div>
+        <br />
+        @if (!_prpModel.GradjaninJeGlasaoNaProslimIzborima)
+        {
+            <button class="btn btn-primary" type="submit" onclick="ga('send', 'event', 'Form', 'Fill', 'PRP1');">Popuni PRP obrazac</button>
+        }
+        else
+        {
+            <button class="btn btn-primary" type="submit" onclick="ga('send', 'event', 'Form', 'Fill', 'PRP2');">Popuni PRP obrazac</button>
+        }
+    </EditForm>
+</div>
+@code {
+    private readonly PRPModel _prpModel = new PRPModel
+    {
+        DokazOIdentitetuLica = true,
+    };
+}
+
+
+@functions {
+    void GlasanjeNaProslimIzborima(ChangeEventArgs args)
+    {
+        _prpModel.GradjaninJeGlasaoNaProslimIzborimaOdabir = args.Value.ToString();
+        if (_prpModel.GradjaninJeGlasaoNaProslimIzborimaOdabir == "Da")
+        {
+            _prpModel.GradjaninJeGlasaoNaProslimIzborima = true;
+        }
+        else if (_prpModel.GradjaninJeGlasaoNaProslimIzborimaOdabir == "Ne")
+        {
+            _prpModel.GradjaninJeGlasaoNaProslimIzborima = false;
+        }
+    }
+
+    void StatusIzbjeglogLica(ChangeEventArgs args)
+    {
+        _prpModel.StatusOdabir = args.Value.ToString();
+        if (_prpModel.StatusOdabir == "Da")
+        {
+            _prpModel.StatusIzbjeglogLica = true;
+            _prpModel.StatusPrivremeniBoravakIzvanBiH = false;
+        }
+        else if (_prpModel.StatusOdabir == "Ne")
+        {
+            _prpModel.StatusIzbjeglogLica = false;
+            _prpModel.StatusPrivremeniBoravakIzvanBiH = true;
+        }
+    }
+
+    void OdabirSpola(ChangeEventArgs args)
+    {
+        _prpModel.SpolOdabir = args.Value.ToString();
+        if (_prpModel.SpolOdabir == "Muski")
+        {
+            _prpModel.SpolMuski = true;
+            _prpModel.SpolZenski = false;
+        }
+        else if (_prpModel.SpolOdabir == "Zenski")
+        {
+            _prpModel.SpolZenski = true;
+            _prpModel.SpolMuski = false;
+        }
+    }
+
+    void OdabirEntitetskogDrzavljanstva(ChangeEventArgs args)
+    {
+        var selection = args.Value.ToString();
+        if (selection == "FBiH")
+        {
+            _prpModel.EntitetskoDrzavljanstvoFBiH = true;
+            _prpModel.EntitetskoDrzavljanstvoRS = false;
+        }
+        else if (selection == "RS")
+        {
+            _prpModel.EntitetskoDrzavljanstvoRS = true;
+            _prpModel.EntitetskoDrzavljanstvoFBiH = false;
+        }
+    }
+
+    void OdabirNacinaGlasanja(ChangeEventArgs args)
+    {
+        _prpModel.GlasanjeOdabir = args.Value.ToString();
+        if (_prpModel.GlasanjeOdabir == "DKP")
+        {
+            _prpModel.GlasanjeDKP = true;
+            _prpModel.GlasanjePosta = false;
+        }
+        else if (_prpModel.GlasanjeOdabir == "Posta")
+        {
+            _prpModel.GlasanjePosta = true;
+            _prpModel.GlasanjeDKP = false;
+        }
+    }
+
+
+    async Task ExportToPdf()
+    {
+        if (!_prpModel.PrebivalisteUBrckoDistriktu)
+        {
+            _prpModel.EntitetskoDrzavljanstvoFBiH = false;
+            _prpModel.EntitetskoDrzavljanstvoRS = false;
+        }
+
+        string formFileName;
+        string filledFormFileName;
+
+        //PRP-2
+        if (_prpModel.GradjaninJeGlasaoNaProslimIzborima)
+        {
+            formFileName = "PRP-2.pdf";
+            filledFormFileName = "PRP-2 obrazac - popunjen.pdf";
+        }
+        else
+        {
+            formFileName = "PRP-1.pdf";
+            filledFormFileName = "PRP-1 obrazac - popunjen.pdf";
+        }
+
+        var formBytes = await Http.GetByteArrayAsync(formFileName);
+        var formToFill = new MemoryStream(formBytes);
+
+        var pdfFormFillingService = new PdfFormFillingService();
+
+        var filledForm = _prpModel.GradjaninJeGlasaoNaProslimIzborima ? pdfFormFillingService.FillFormPRP2(formToFill, _prpModel) : pdfFormFillingService.FillFormPRP1(formToFill, _prpModel);
+
+        try
+        {
+            SendUserDataService.SendUserData(_prpModel);
+        }
+        // ReSharper disable once EmptyGeneralCatchClause
+        catch
+        {
+        }
+        await JS.SaveAs(filledFormFileName, filledForm.ToArray());
+
+    }
+}
