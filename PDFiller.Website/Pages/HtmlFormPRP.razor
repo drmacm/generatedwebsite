@@ -292,12 +292,6 @@
         <br />
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <div class="form-group row">
-            <label for="pristanak-checkbox" class="col-sm-4 col-form-label">Želim biti informiran o Lokalnim izborima 2020. putem e-maila</label>
-            <div class="col-sm-8">
-                <input type="checkbox" id="pristanak-checkbox" @bind="_prpModel.PristanakZaKontakt" />
-            </div>
-        </div>
         <br />
         @if (!_prpModel.GradjaninJeGlasaoNaProslimIzborima)
         {
@@ -431,15 +425,6 @@
         var pdfFormFillingService = new PdfFormFillingService();
 
         var filledForm = _prpModel.GradjaninJeGlasaoNaProslimIzborima ? pdfFormFillingService.FillFormPRP2(formToFill, _prpModel) : pdfFormFillingService.FillFormPRP1(formToFill, _prpModel);
-
-        try
-        {
-            SendUserDataService.SendUserData(_prpModel);
-        }
-        // ReSharper disable once EmptyGeneralCatchClause
-        catch
-        {
-        }
 
         await JS.SaveAs(filledFormFileName, filledForm.ToArray());
 

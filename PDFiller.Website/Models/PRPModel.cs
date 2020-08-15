@@ -20,9 +20,6 @@ namespace PDFiller.Website.Models
 
         public bool PrebivalisteUBrckoDistriktu { get; set; }
 
-        public bool PristanakZaKontakt { get; set; }
-
-
         #region Polja sa PRP formulara
         [Required(ErrorMessage = "Morate upisati JMB!")]
         [RegularExpression("^[0-9]{13}$", ErrorMessage = "JMB mora imati tačno 13 cifri!")]
