@@ -307,6 +307,14 @@
         {
             <button class="btn btn-primary" type="submit" onclick="ga('send', 'event', 'Form', 'Fill', 'PRP2');">Popuni PRP obrazac</button>
         }
+        <br />
+        <br />
+        <div id="form-loading" style="display: none;">
+            <div id="form-spinner" class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            Obrazac se trenutno kreira, molimo pričekajte.
+        </div>
     </EditForm>
 </div>
 @code {
@@ -394,6 +402,8 @@
 
     async Task ExportToPdf()
     {
+        await JS.ShowSpinner();
+
         if (!_prpModel.PrebivalisteUBrckoDistriktu)
         {
             _prpModel.EntitetskoDrzavljanstvoFBiH = false;
@@ -430,7 +440,9 @@
         catch
         {
         }
+
         await JS.SaveAs(filledFormFileName, filledForm.ToArray());
 
+        await JS.HideSpinner();
     }
 }

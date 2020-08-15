@@ -349,10 +349,12 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     <script type="text/javascript">
-        function BrckoToggle() {
-            console.log("change happened");
-            var show = $('#brcko-checkbox').prop('checked');
-            $('#brcko-formgroup').toggle(show);
+        function showSpinner() {
+            $('#form-loading').show();
+        }
+
+        function hideSpinner() {
+            $('#form-loading').hide();
         }
 
         function saveAsFile(filename, bytesBase64) {
