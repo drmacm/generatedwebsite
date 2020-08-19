@@ -292,12 +292,6 @@
         <br />
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <div class="form-group row">
-            <label for="pristanak-checkbox" class="col-sm-4 col-form-label">Želim biti informiran o Lokalnim izborima 2020. putem e-maila</label>
-            <div class="col-sm-8">
-                <input type="checkbox" id="pristanak-checkbox" @bind="_prpModel.PristanakZaKontakt" />
-            </div>
-        </div>
         <br />
         @if (!_prpModel.GradjaninJeGlasaoNaProslimIzborima)
         {
@@ -307,6 +301,14 @@
         {
             <button class="btn btn-primary" type="submit" onclick="ga('send', 'event', 'Form', 'Fill', 'PRP2');">Popuni PRP obrazac</button>
         }
+        <br />
+        <br />
+        <div id="form-loading" style="display: none;">
+            <div id="form-spinner" class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            Obrazac se trenutno kreira, molimo pričekajte.
+        </div>
     </EditForm>
 </div>
 @code {
@@ -394,6 +396,8 @@
 
     async Task ExportToPdf()
     {
+        await JS.ShowSpinner();
+
         if (!_prpModel.PrebivalisteUBrckoDistriktu)
         {
             _prpModel.EntitetskoDrzavljanstvoFBiH = false;
@@ -422,15 +426,8 @@
 
         var filledForm = _prpModel.GradjaninJeGlasaoNaProslimIzborima ? pdfFormFillingService.FillFormPRP2(formToFill, _prpModel) : pdfFormFillingService.FillFormPRP1(formToFill, _prpModel);
 
-        try
-        {
-            SendUserDataService.SendUserData(_prpModel);
-        }
-        // ReSharper disable once EmptyGeneralCatchClause
-        catch
-        {
-        }
         await JS.SaveAs(filledFormFileName, filledForm.ToArray());
 
+        await JS.HideSpinner();
     }
 }

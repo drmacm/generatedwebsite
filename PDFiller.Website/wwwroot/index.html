@@ -158,7 +158,7 @@
                                class="btn btn-primary">Provjeri status</a>
                         </p>
                         <p>
-                            Pritisnite na dugme „Provjeri status“ i otvorit će vam se opcijana stranici <a href="http://www.izbori.ba/">www.izbori.ba</a> za provjeru registracije.
+                            Pritisnite na dugme „Provjeri status“ i otvorit će vam se opcija na stranici <a href="http://www.izbori.ba/">www.izbori.ba</a> za provjeru registracije.
                             Unesite prezime, ime i JMB i pritisnite na dugme „Provjeri“. Nakon toga se treba otvoriti informacija o redovnom biračkom mjestu u BiH na kojem ste registrovani.
                         </p>
                         <p>
@@ -179,7 +179,7 @@
                     <div class="col">
                         <h3>Zašto?</h3>
                         <p>
-                            Provjerom statusa u Centralnoj izbornoj komisiji Bosne i Hercegovine (CIK BiH)  kontrološete tačnost podataka kojima raspolaže CIK BiH:
+                            Provjerom statusa u Centralnoj izbornoj komisiji Bosne i Hercegovine (CIK BiH)  kontrolišete tačnost podataka kojima raspolaže CIK BiH:
                             da li ste ili niste registrovani za glasanje, vaše biračko mjesto na osnovu vašeg prebivališta u općini u kojoj ste prijavljeni u BiH
                             (tamo gdje ste izvadili ličnu kartu/osobnu iskaznicu ili pasoš/putovnicu).
                             Svi koji su upisani u Centralni birački spisak u CIK-u BiH, registrovani su za glasanje na jednom redovnom biračkom mjestu u BiH.
@@ -209,7 +209,11 @@
                             U ovisnosti od Vašeg odgovora na prva dva pitanja - sistem će automatski odrediti da li ispunjavate PRP1 ili PRP2 obrazac.
                             Nakon što ispunite sva polja dobit ćete odgovarajući obrazac.
                         </p>
-
+                        <div class="alert alert-primary">
+                            <p>
+                                Kreiranje obrasca na osnovu popunjenih polja se dešava na Vašem računaru, tako da ova stranica ne čuva niti koristi Vaše osobne podatke.
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <br>
@@ -327,6 +331,11 @@
             <p>
                 Upravo ste napravili veliki korak za doprinos boljoj budućnosti Bosne i Hercegovine!
             </p>
+            <div class="copyright">
+                <p>
+                    © Copyright <strong><span>Platforma za progres</span></strong>, 2020.
+                </p>
+            </div>
         </div>
     </footer>
 
@@ -349,10 +358,12 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     <script type="text/javascript">
-        function BrckoToggle() {
-            console.log("change happened");
-            var show = $('#brcko-checkbox').prop('checked');
-            $('#brcko-formgroup').toggle(show);
+        function showSpinner() {
+            $('#form-loading').show();
+        }
+
+        function hideSpinner() {
+            $('#form-loading').hide();
         }
 
         function saveAsFile(filename, bytesBase64) {
